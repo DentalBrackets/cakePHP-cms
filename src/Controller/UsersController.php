@@ -107,7 +107,7 @@ class UsersController extends AppController
     {
         parent::beforeFilter($event);
         // Not require authentication for login page, preventing infinite loop
-        $this->Authentication->addUnauthenticatedActions(['login']);
+        $this->Authentication->addUnauthenticatedActions(['login', 'add']);
     }
 
     public function login()
