@@ -15,6 +15,10 @@
  * @license       MIT License (https://opensource.org/licenses/mit-license.php)
  */
 
+// Error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
 // Check platform requirements
 require dirname(__DIR__) . '/config/requirements.php';
 

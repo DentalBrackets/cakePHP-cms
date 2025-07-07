@@ -420,5 +420,6 @@ return [
      */
     'Session' => [
         'defaults' => 'php',
+        'cookie_secure' => env('HTTPS', false)
     ],
 ];
