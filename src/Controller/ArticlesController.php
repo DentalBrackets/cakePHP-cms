@@ -7,7 +7,8 @@ class ArticlesController extends AppController
 {
     public function index()
     {
-        echo "Test";
+        $this->Authorization->skipAuthorization();
+
         $this->loadComponent('Paginator');
         $articles = $this->Paginator->paginate($this->Articles->find());
         $this->set(compact('articles'));
@@ -15,6 +16,8 @@ class ArticlesController extends AppController
 
     public function view($slug = null)
     {
+        $this->Authorization->skipAuthorization();
+
         $article = $this->Articles
             ->findBySlug($slug)
             ->contain('Tags')
@@ -27,12 +30,13 @@ class ArticlesController extends AppController
     {
         // 1. Crear una nueva entidad
         $article = $this->Articles->newEmptyEntity();
+        $this->Authorization->authorize($article);
         
         // 2. Si el método es POST: 
         if($this->request->is('post')) {
             $article = $this->Articles->patchEntity($article, $this->request->getData());
-            
-            $article->user_id = 1;
+
+            $article->user_id = $this->request->getAttribute('identity')->getIdentifier();
 
             // 3. Guardar artículo
             if ($this->Articles->save($article)) {
@@ -59,10 +63,14 @@ class ArticlesController extends AppController
             ->contain('Tags')
             ->firstOrFail();
 
+        $this->Authorization->authorize();
+
         // 2. Evaluar si la request es put o post
         if ($this->request->is(['put', 'post'])) {
             // 3. Actualizar el articulo mediante su entidad
-            $this->Articles->patchEntity($article, $this->request->getData());
+            $this->Articles->patchEntity($article, $this->request->getData(), [
+                'accessibleFields' => ['user_id' => false]
+            ]);
 
             // 4. Guardar el articulo mediante su modelo
             if ($this->Articles->save($article)) {
@@ -93,6 +101,9 @@ class ArticlesController extends AppController
             ->findBySlug($slug)
             ->firstOrFail();
 
+        // Authorize
+        $this->Authorization->authorize();
+
         // 3. Eliminar el artíclo
         if ($this->Articles->delete($article)) {
             $this->Flash->success(__('The {0} article has been deleted.', $article->title));
@@ -114,7 +125,8 @@ class ArticlesController extends AppController
             
             public function tags(...tags){}
         */
-        
+        $this->Authorization->skipAuthorization();
+
         $tags = $this->request->getParam('pass');
 
         // 1. Obtener articulos etiquetados
